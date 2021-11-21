@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import CICharField
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
+from company.models import Company
 from lib.models import BaseModel
 
 
@@ -34,9 +35,19 @@ class CustomUser(AbstractUser):
 
 class Employer(BaseModel):
     user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
-    # TODO-1 : add company field here
+    company = models.OneToOneField(Company, on_delete=models.SET_NULL, null=True)
+
+    class Meta:
+        verbose_name = _('employer')
+        verbose_name_plural = _('employers')
+        db_table = 'employer'
 
 
 class JobSeeker(BaseModel):
     user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
     birthday = models.DateField(verbose_name=_('birthday'), blank=True, null=True)
+
+    class Meta:
+        verbose_name = _('job seeker')
+        verbose_name_plural = _('job seekers')
+        db_table = 'job_seeker'
