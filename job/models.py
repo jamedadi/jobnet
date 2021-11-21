@@ -17,6 +17,18 @@ class JobCategory(BaseModel):
         db_table = 'job_category'
 
 
+class Skill(BaseModel):
+    title = models.CharField(max_length=48, verbose_name=_('name'))
+
+    def __str__(self):
+        return f'{self.title}'
+
+    class Meta:
+        verbose_name = _('skill')
+        verbose_name_plural = _('skills')
+        db_table = 'skill'
+
+
 class Job(BaseModel):
     NOT_IMPORTANT = 0
     LESS_THAN_THREE = 1
@@ -39,6 +51,7 @@ class Job(BaseModel):
     MALE = 0
     FEMALE = 1
     SEX_CHOICES = (
+        (NOT_IMPORTANT, 'not important'),
         (MALE, _('male')),
         (FEMALE, _('female'))
     )
@@ -65,6 +78,7 @@ class Job(BaseModel):
     description = models.TextField(verbose_name=_('description'))
     sex = models.PositiveSmallIntegerField(verbose_name=_('sex'), choices=SEX_CHOICES)
     at_least_degree = models.PositiveSmallIntegerField(verbose_name=_('at least degree'), choices=DEGREE_CHOICES)
+    required_skills = models.ManyToManyField(to=Skill, verbose_name=_('required skills'), related_name='jobs')
 
     def __str__(self):
         return f"{self.title}"
