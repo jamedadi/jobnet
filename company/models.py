@@ -19,6 +19,9 @@ class CompanyType(BaseModel):
         verbose_name_plural = _('company types')
         db_table = 'company_type'
 
+    def __str__(self):
+        return self.type
+
 
 class Company(BaseModel):
     persian_name = models.CharField(max_length=150, verbose_name=_('persian name'))
@@ -39,6 +42,9 @@ class Company(BaseModel):
     def name(self):
         return f"{self.persian_name} | {self.english_name}"
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = _('company')
         verbose_name_plural = _('companies')
@@ -47,6 +53,9 @@ class Company(BaseModel):
 
 class EmployeeType(BaseModel):
     type = models.CharField(max_length=60, verbose_name=_('type'))
+
+    def __str__(self):
+        return self.type
 
     class Meta:
         verbose_name = _('type')
@@ -65,6 +74,9 @@ class Employee(BaseModel):
         related_name='employees',
         verbose_name=_('company')
     )
+
+    def __str__(self):
+        return f"{self.name} | {self.type}"
 
     class Meta:
         verbose_name = _('employee')
