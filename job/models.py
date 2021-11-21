@@ -68,7 +68,7 @@ class Job(BaseModel):
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
                                  on_delete=models.SET_NULL, null=True)
-    city = models.ForeignKey(to=City, verbose_name=_('address'), related_name='jobs', on_delete=models.CASCADE)
+    city = models.ForeignKey(to=City, verbose_name=_('city'), related_name='jobs', on_delete=models.CASCADE)
     cooperation_type = models.PositiveSmallIntegerField(verbose_name=_('cooperation type'), choices=COOPERATION_CHOICES)
     remote_available = models.BooleanField(verbose_name=_('remote available'), default=False)
     work_experience = models.PositiveSmallIntegerField(verbose_name=_('work experience'),
