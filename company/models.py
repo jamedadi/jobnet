@@ -35,6 +35,10 @@ class Company(BaseModel):
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
 
+    @property
+    def name(self):
+        return f"{self.persian_name} | {self.english_name}"
+
     class Meta:
         verbose_name = _('company')
         verbose_name_plural = _('companies')

@@ -82,7 +82,7 @@ class Job(BaseModel):
     required_skills = models.ManyToManyField(to=Skill, verbose_name=_('required skills'), related_name='jobs')
 
     def __str__(self):
-        return f"{self.title}"
+        return f"{self.title} ({self.company.name})"
 
     class Meta:
         verbose_name = _('job')
