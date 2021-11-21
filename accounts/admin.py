@@ -8,10 +8,10 @@ User = get_user_model()
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name',
-                    'date_joined', 'is_staff', 'is_active', 'user_type')
+    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'date_joined',
+                    'is_staff', 'is_active', 'is_employer', 'is_job_seeker')
     list_display_links = ('id', 'username', 'email')
-    list_filter = ('user_type',)
+    list_filter = ('is_employer', 'is_job_seeker')
     search_fields = ('username', 'email')
 
 
