@@ -11,8 +11,8 @@ class State(BaseModel):
         return self.name
 
     class Meta:
-        verbose_name = _('State')
-        verbose_name_plural = _('States')
+        verbose_name = _('state')
+        verbose_name_plural = _('states')
         db_table = 'state'
 
 
@@ -24,6 +24,6 @@ class City(BaseModel):
         return f'{self.name}'
 
     class Meta:
-        verbose_name = _('City')
-        verbose_name_plural = _('Cities')
+        verbose_name = _('city')
+        verbose_name_plural = _('cities')
         db_table = 'city'
