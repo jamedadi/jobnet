@@ -1,6 +1,7 @@
 from django.db import models
 
 from address.models import City
+from company.models import Company
 from lib.models import BaseModel
 from django.utils.translation import ugettext_lazy as _
 
@@ -64,7 +65,7 @@ class Job(BaseModel):
         (Bachelor, _('bachelor'))
     )
 
-    # TODO : company
+    company = models.ForeignKey(to=Company, verbose_name=_('company'), related_name='jobs', on_delete=models.CASCADE)
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
                                  on_delete=models.SET_NULL, null=True)
