@@ -6,6 +6,10 @@ from django.utils.translation import ugettext_lazy as _
 from lib.models import BaseModel
 
 
+def year_choices():
+    return [(y, y) for y in range(1280, khayyam.JalaliDatetime.today().year + 1)]
+
+
 class CompanyType(BaseModel):
     type = models.CharField(max_length=60, verbose_name=_('type'))
 
@@ -16,14 +20,9 @@ class CompanyType(BaseModel):
 
 
 class Company(BaseModel):
-
-    @staticmethod
-    def year_choices():
-        return tuple([(y, y) for y in range(1280, khayyam.JalaliDatetime.today().year + 1)])
-
     persian_name = models.CharField(max_length=150, verbose_name=_('persian name'))
     english_name = models.CharField(max_length=150, verbose_name=_('english name'))
-    foundation = models.PositiveSmallIntegerField(_('year'), choices=year_choices)
+    foundation = models.PositiveSmallIntegerField(_('year'), choices=year_choices())
     site = models.URLField(verbose_name=_('site'), blank=True)
     logo = models.ImageField(upload_to='company/logos/', verbose_name=_('logo'))
     banner = models.ImageField(upload_to='company/banners/', verbose_name=_('banner'))
