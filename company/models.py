@@ -3,6 +3,7 @@ import khayyam
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from address.models import City
 from lib.models import BaseModel
 
 
@@ -29,7 +30,7 @@ class Company(BaseModel):
     type = models.ForeignKey(CompanyType, on_delete=models.PROTECT, related_name='companies', verbose_name='type')
     number_of_employees = models.PositiveSmallIntegerField(verbose_name=_('number of employees'))
     description = models.TextField(verbose_name=_('description'))
-    # TODO-1 : create city field here
+    city = models.ForeignKey(to=City, verbose_name=_('city'), related_name='companies', on_delete=models.CASCADE)
     introduction = models.TextField(verbose_name=_('introduction'), blank=True)
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
