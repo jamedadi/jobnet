@@ -35,6 +35,9 @@ INSTALLED_APPS = [
 
     'accounts.apps.AccountsConfig',
     'company.apps.CompanyConfig',
+    'job.apps.JobConfig',
+    'resume.apps.ResumeConfig',
+    'address.apps.AddressConfig',
 ]
 
 MIDDLEWARE = [
