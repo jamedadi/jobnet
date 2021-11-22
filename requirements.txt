@@ -1,10 +1,13 @@
 asgiref==3.4.1
 Django==3.2
 django-seed==0.3.1
+djangorestframework==3.12.4
+djangorestframework-simplejwt==5.0.0
 Faker==9.8.2
 Khayyam==3.0.17
 Pillow==8.4.0
 psycopg2-binary==2.9.2
+PyJWT==2.3.0
 python-dateutil==2.8.2
 python-decouple==3.5
 pytz==2021.3
