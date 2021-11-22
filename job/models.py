@@ -65,6 +65,12 @@ class Job(BaseModel):
         (Bachelor, _('bachelor'))
     )
 
+    SERVED_OR_EXEMPT = 1
+    MILITARY_SERVICE_CHOICES = (
+        (NOT_IMPORTANT, _('not important')),
+        (SERVED_OR_EXEMPT, _('served or exempt'))
+    )
+
     company = models.ForeignKey(to=Company, verbose_name=_('company'), related_name='jobs', on_delete=models.CASCADE)
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
@@ -80,6 +86,8 @@ class Job(BaseModel):
     sex = models.PositiveSmallIntegerField(verbose_name=_('sex'), choices=SEX_CHOICES)
     at_least_degree = models.PositiveSmallIntegerField(verbose_name=_('at least degree'), choices=DEGREE_CHOICES)
     required_skills = models.ManyToManyField(to=Skill, verbose_name=_('required skills'), related_name='jobs')
+    military_service_status = models.PositiveSmallIntegerField(_('military service status'),
+                                                               choices=MILITARY_SERVICE_CHOICES)
 
     def __str__(self):
         return f"{self.title} ({self.company.name})"
