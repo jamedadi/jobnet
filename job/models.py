@@ -1,9 +1,12 @@
 from django.db import models
 
+from accounts.models import JobSeeker
 from address.models import City
 from company.models import Company
 from lib.models import BaseModel
 from django.utils.translation import ugettext_lazy as _
+
+from resume.models import Resume
 
 
 class JobCategory(BaseModel):
@@ -96,3 +99,36 @@ class Job(BaseModel):
         verbose_name = _('job')
         verbose_name_plural = _('jobs')
         db_table = 'jobs'
+
+
+class JobRequest(BaseModel):
+    NOT_SEEN = 0
+    SEEN = 1
+    SEEN_STATUS_CHOICES = (
+        (SEEN, _('seen')),
+        (NOT_SEEN, _('not seen'))
+    )
+
+    WAITING = 0
+    DENIED = 1
+    STATUS_CHOICES = (
+        (WAITING, _('waiting')),
+        (DENIED, _('denied'))
+    )
+
+    job = models.ForeignKey(to=Job, verbose_name=_('job'), related_name='job_requests', on_delete=models.PROTECT)
+    job_seeker = models.ForeignKey(to=JobSeeker, verbose_name=_('job seeker'), related_name='job_requests',
+                                   on_delete=models.PROTECT)
+    resume = models.ForeignKey(to=Resume, verbose_name=_('resume'), related_name='job_requests',
+                               on_delete=models.SET_NULL, null=True)
+    seen_status = models.PositiveSmallIntegerField(verbose_name=_('seen status'), choices=SEEN_STATUS_CHOICES,
+                                                   default=NOT_SEEN)
+    status = models.PositiveSmallIntegerField(verbose_name=_('status'), choices=STATUS_CHOICES, default=WAITING)
+
+    def __str__(self):
+        return f"{self.job_seeker} - {self.job}"
+
+    class Meta:
+        verbose_name = _('job request')
+        verbose_name_plural = _('job requests')
+        db_table = 'job_request'
