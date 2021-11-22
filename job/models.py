@@ -49,16 +49,16 @@ class Job(BaseModel):
         (PART_TIME, _('part time'))
     )
 
-    MALE = 0
-    FEMALE = 1
+    MALE = 1
+    FEMALE = 2
     SEX_CHOICES = (
         (NOT_IMPORTANT, 'not important'),
         (MALE, _('male')),
         (FEMALE, _('female'))
     )
 
-    Associate = 0
-    Bachelor = 1
+    Associate = 1
+    Bachelor = 2
     DEGREE_CHOICES = (
         (NOT_IMPORTANT, _('not important')),
         (Associate, _('associate')),
