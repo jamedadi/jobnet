@@ -9,15 +9,21 @@ class StateSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class CitySerializer(serializers.ModelSerializer):
+class ReadCitySerializer(serializers.ModelSerializer):
     def get_state(self, obj):
         return {
-            "name": obj.state.name,
-            "slug": obj.sate.slug
+            'name': obj.state.name,
+            'slug': obj.state.slug
         }
 
-    author = serializers.SerializerMethodField('get_state')
+    state = serializers.SerializerMethodField('get_state')
 
     class Meta:
         model = City
-        fields = ('name', 'slug')
+        fields = ('name', 'slug', 'state')
+
+
+class WriteCitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = City
+        fields = ('state', 'slug', 'name')
