@@ -8,5 +8,5 @@ router.register('state', StateViewSet)
 router.register('city', CityViewSet)
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
 ]
