@@ -3,6 +3,7 @@ import khayyam
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from accounts.models import Employer
 from address.models import City
 from lib.models import BaseModel
 
@@ -24,6 +25,8 @@ class CompanyType(BaseModel):
 
 
 class Company(BaseModel):
+    employer = models.OneToOneField(to=Employer, verbose_name=_('employer'), related_name='company',
+                                    on_delete=models.CASCADE)
     persian_name = models.CharField(max_length=150, verbose_name=_('persian name'))
     english_name = models.CharField(max_length=150, verbose_name=_('english name'))
     foundation = models.PositiveSmallIntegerField(_('year'), choices=year_choices())

@@ -35,7 +35,6 @@ class CustomUser(AbstractUser):
 
 class Employer(BaseModel):
     user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
-    company = models.OneToOneField(Company, on_delete=models.SET_NULL, null=True)
 
     class Meta:
         verbose_name = _('employer')
