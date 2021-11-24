@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.models import JobSeeker
+from accounts.models import JobSeeker, Employer
 from address.models import City
 from company.models import Company
 from lib.models import BaseModel
@@ -73,8 +73,9 @@ class Job(BaseModel):
         (NOT_IMPORTANT, _('not important')),
         (SERVED_OR_EXEMPT, _('served or exempt'))
     )
-
+    employer = models.ForeignKey(to=Employer, verbose_name=_('employer'), related_name='jobs', on_delete=models.CASCADE)
     company = models.ForeignKey(to=Company, verbose_name=_('company'), related_name='jobs', on_delete=models.CASCADE)
+
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
                                  on_delete=models.SET_NULL, null=True)
