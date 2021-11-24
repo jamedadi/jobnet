@@ -6,7 +6,7 @@ from address.models import State, City
 class StateSerializer(serializers.ModelSerializer):
     class Meta:
         model = State
-        fields = ('name', 'slug')
+        fields = ('id', 'name', 'slug')
 
 
 class ReadCitySerializer(serializers.ModelSerializer):
