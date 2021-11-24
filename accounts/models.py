@@ -5,7 +5,6 @@ from django.contrib.postgres.fields import CICharField
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
 
-from company.models import Company
 from lib.models import BaseModel
 
 

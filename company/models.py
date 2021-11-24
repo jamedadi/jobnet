@@ -25,8 +25,6 @@ class CompanyType(BaseModel):
 
 
 class Company(BaseModel):
-    employer = models.OneToOneField(to=Employer, verbose_name=_('employer'), related_name='company',
-                                    on_delete=models.CASCADE)
     persian_name = models.CharField(max_length=150, verbose_name=_('persian name'))
     english_name = models.CharField(max_length=150, verbose_name=_('english name'))
     foundation = models.PositiveSmallIntegerField(_('year'), choices=year_choices())
@@ -40,6 +38,8 @@ class Company(BaseModel):
     introduction = models.TextField(verbose_name=_('introduction'), blank=True)
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
+    employer = models.ForeignKey(to=Employer, verbose_name=_('employer'), related_name='company',
+                                 on_delete=models.CASCADE, default=1)
 
     @property
     def name(self):
