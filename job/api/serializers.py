@@ -46,4 +46,4 @@ class ReadJobSerializer(serializers.ModelSerializer):
 class WriteJobSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
-        exclude = ('company', 'created_time', 'modified_time')
+        exclude = ('employer', 'company', 'created_time', 'modified_time')
