@@ -22,7 +22,7 @@ class JobCategory(BaseModel):
 
 
 class Skill(BaseModel):
-    title = models.CharField(max_length=48, verbose_name=_('name'))
+    title = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.title}'
