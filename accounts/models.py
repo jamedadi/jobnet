@@ -33,7 +33,8 @@ class CustomUser(AbstractUser):
 
 
 class Employer(BaseModel):
-    user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
+    user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'),
+                                related_name='employer')
 
     class Meta:
         verbose_name = _('employer')
@@ -45,7 +46,8 @@ class Employer(BaseModel):
 
 
 class JobSeeker(BaseModel):
-    user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
+    user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'),
+                                related_name='job_seeker')
     birthday = models.DateField(verbose_name=_('birthday'), blank=True, null=True)
 
     class Meta:
