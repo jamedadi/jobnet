@@ -10,7 +10,7 @@ from resume.models import Resume
 
 
 class JobCategory(BaseModel):
-    name = models.CharField(max_length=48, verbose_name=_('name'))
+    name = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.name}'
