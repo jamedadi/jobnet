@@ -38,8 +38,8 @@ class Company(BaseModel):
     introduction = models.TextField(verbose_name=_('introduction'), blank=True)
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
-    employer = models.ForeignKey(to=Employer, verbose_name=_('employer'), related_name='company',
-                                 on_delete=models.CASCADE, default=1)
+    employer = models.OneToOneField(to=Employer, verbose_name=_('employer'), related_name='company',
+                                    on_delete=models.CASCADE, default=1)
 
     @property
     def name(self):
