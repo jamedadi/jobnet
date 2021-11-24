@@ -1,7 +1,7 @@
 from rest_framework.viewsets import ModelViewSet
 
 from job.api.permissions import IsEmployerOrReadOnly, IsCompanyEmployerOrReadOnly
-from job.api.serializers import JobCategorySerializer, SkillSerializer, ReadJobSerializer
+from job.api.serializers import JobCategorySerializer, SkillSerializer, ReadJobSerializer, WriteJobSerializer
 from job.models import JobCategory, Skill, Job
 from lib.api.permissions import IsAdminOrReadOnly
 
@@ -20,5 +20,13 @@ class SkillViewSet(ModelViewSet):
 
 class JobViewSet(ModelViewSet):
     queryset = Job.objects.all()
-    serializer_class = ReadJobSerializer
     permission_classes = [IsCompanyEmployerOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action in ('create', 'update', 'partial_update'):
+            return WriteJobSerializer
+        return ReadJobSerializer
+
+    def perform_create(self, serializer):
+        employer = self.request.user.employer
+        serializer.save(employer=employer, company=employer.company)
