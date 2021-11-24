@@ -40,6 +40,9 @@ class Employer(BaseModel):
         verbose_name_plural = _('employers')
         db_table = 'employer'
 
+    def __str__(self):
+        return f"{self.user.username}"
+
 
 class JobSeeker(BaseModel):
     user = models.OneToOneField(CustomUser, on_delete=models.PROTECT, primary_key=True, verbose_name=_('user'))
