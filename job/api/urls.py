@@ -5,8 +5,8 @@ from job.api.views import JobCategoryViewSet, SkillViewSet, JobViewSet
 
 router = routers.SimpleRouter()
 router.register('skill', SkillViewSet)
-router.register('', JobViewSet)
 router.register('job-category', JobCategoryViewSet)
+router.register('', JobViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
