@@ -7,6 +7,7 @@ from jobnet import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/accounts/', include('accounts.api.urls')),
     path('api/company/', include('company.api.urls')),
     path('api/resume/', include('resume.api.urls')),
     path('api/address/', include('address.api.urls')),
