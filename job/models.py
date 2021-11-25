@@ -85,7 +85,7 @@ class Job(BaseModel):
     work_experience = models.PositiveSmallIntegerField(verbose_name=_('work experience'),
                                                        choices=WORK_EXPERIENCE_CHOICES, default=0)
     salary_agreement = models.BooleanField(verbose_name=_('salary agreement'), default=True)
-    salary = models.PositiveIntegerField(verbose_name=_('salary'))
+    salary = models.PositiveIntegerField(verbose_name=_('salary'), null=True)
     description = models.TextField(verbose_name=_('description'))
     sex = models.PositiveSmallIntegerField(verbose_name=_('sex'), choices=SEX_CHOICES)
     at_least_degree = models.PositiveSmallIntegerField(verbose_name=_('at least degree'), choices=DEGREE_CHOICES)
