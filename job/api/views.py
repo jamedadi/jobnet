@@ -22,7 +22,6 @@ class JobViewSet(ModelViewSet):
     queryset = Job.objects.all()
     permission_classes = [IsCompanyEmployerOrReadOnly]
     filterset_fields = ['category__name', 'city__name', 'city__state__name', 'cooperation_type', 'remote_available']
-
     search_fields = ['title', 'required_skills__title']
 
     def get_serializer_class(self):
