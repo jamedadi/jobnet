@@ -1,19 +1,22 @@
 from django.contrib.auth import get_user_model
 from django.utils.translation import ugettext_lazy as _
 
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework import exceptions
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import mixins
+from rest_framework.viewsets import GenericViewSet
 
-from accounts.api.permissions import IsNotAuthenticated
-from accounts.api.serializers import UserRegistrationSerializer
+from accounts.api.permissions import IsNotAuthenticated, UserObjectOwner
+from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
+    UserDetailUpdateAndReadSerializer
 
 User = get_user_model()
 
 
 class UserRegistrationCreateApiView(CreateAPIView):
-    queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
-    permission_classes = (IsNotAuthenticated, )
+    permission_classes = (IsNotAuthenticated,)
     lookup_url_kwarg = "user_type"
 
     def perform_create(self, serializer):
@@ -26,3 +29,24 @@ class UserRegistrationCreateApiView(CreateAPIView):
             raise exceptions.NotAcceptable(_('Don\'t send bad params!'))
 
 
+class UserChangePasswordUpdateApiView(UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserChangePasswordSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+
+class UserUpdateDetailUpdateApiView(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                                    mixins.UpdateModelMixin, GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserDetailUpdateAndReadSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_permissions(self):
+        if self.action in ('update', 'partial_update'):
+            permission_classes = (UserObjectOwner,)
+        else:
+            permission_classes = ()
+        return (permission() for permission in permission_classes)
