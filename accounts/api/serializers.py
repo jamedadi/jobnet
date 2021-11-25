@@ -51,3 +51,48 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = self.Meta.model.objects.create_user(**self.clean_validated_data(validated_data))
         self.create_sub_user(user)
         return user
+
+
+class UserChangePasswordSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        model = User
+        fields = ('old_password', 'new_password', 'confirm_password')
+
+    def validate(self, attrs):
+        # here check password is strong or what! :D
+        validate_password(attrs.get('new_password'))
+
+        if attrs.get('new_password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError(_('Password and Confirm Password isn\'t equal!'))
+
+        return attrs
+
+    def update(self, instance, validated_data):
+        if instance.check_password(validated_data.get('old_password')):
+            instance.password = make_password(validated_data.get('new_password'))
+            instance.save()
+        raise serializers.ValidationError(_('Old Password and Password isn\'t equal!'))
+
+
+class UserDetailUpdateAndReadSerializer(serializers.ModelSerializer):
+    date_joined = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'date_joined')
