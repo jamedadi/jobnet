@@ -1,25 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from accounts.models import JobSeeker, Employer
 
 User = get_user_model()
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'email', 'first_name', 'last_name', 'date_joined',
-                    'is_staff', 'is_active', 'is_employer', 'is_job_seeker')
-    list_display_links = ('id', 'username', 'email')
-    list_filter = ('is_employer', 'is_job_seeker')
-    search_fields = ('username', 'email')
+class UserAdmin(BaseUserAdmin):
+    list_display = BaseUserAdmin.list_display + ('is_employer', 'is_job_seeker')
+    list_filter = BaseUserAdmin.list_filter + ('is_employer', 'is_job_seeker')
+    list_editable = ('is_staff', 'is_employer', 'is_job_seeker')
 
 
 @admin.register(JobSeeker)
 class JobSeekerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user',)
 
 
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user',)

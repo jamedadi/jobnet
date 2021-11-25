@@ -1,6 +1,6 @@
 from django.db import models
 
-from accounts.models import JobSeeker
+from accounts.models import JobSeeker, Employer
 from address.models import City
 from company.models import Company
 from lib.models import BaseModel
@@ -10,7 +10,7 @@ from resume.models import Resume
 
 
 class JobCategory(BaseModel):
-    name = models.CharField(max_length=48, verbose_name=_('name'))
+    name = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -22,7 +22,7 @@ class JobCategory(BaseModel):
 
 
 class Skill(BaseModel):
-    title = models.CharField(max_length=48, verbose_name=_('name'))
+    title = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.title}'
@@ -73,8 +73,9 @@ class Job(BaseModel):
         (NOT_IMPORTANT, _('not important')),
         (SERVED_OR_EXEMPT, _('served or exempt'))
     )
-
+    employer = models.ForeignKey(to=Employer, verbose_name=_('employer'), related_name='jobs', on_delete=models.CASCADE)
     company = models.ForeignKey(to=Company, verbose_name=_('company'), related_name='jobs', on_delete=models.CASCADE)
+
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
                                  on_delete=models.SET_NULL, null=True)
@@ -84,7 +85,7 @@ class Job(BaseModel):
     work_experience = models.PositiveSmallIntegerField(verbose_name=_('work experience'),
                                                        choices=WORK_EXPERIENCE_CHOICES, default=0)
     salary_agreement = models.BooleanField(verbose_name=_('salary agreement'), default=True)
-    salary = models.PositiveIntegerField(verbose_name=_('salary'))
+    salary = models.PositiveIntegerField(verbose_name=_('salary'), null=True)
     description = models.TextField(verbose_name=_('description'))
     sex = models.PositiveSmallIntegerField(verbose_name=_('sex'), choices=SEX_CHOICES)
     at_least_degree = models.PositiveSmallIntegerField(verbose_name=_('at least degree'), choices=DEGREE_CHOICES)
