@@ -39,7 +39,7 @@ class Company(BaseModel):
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
     employer = models.OneToOneField(to=Employer, verbose_name=_('employer'), related_name='company',
-                                    on_delete=models.CASCADE, default=1)
+                                    on_delete=models.CASCADE)
 
     @property
     def name(self):
