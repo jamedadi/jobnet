@@ -3,6 +3,7 @@ import khayyam
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from accounts.models import Employer
 from address.models import City
 from lib.models import BaseModel
 
@@ -28,8 +29,8 @@ class Company(BaseModel):
     english_name = models.CharField(max_length=150, verbose_name=_('english name'))
     foundation = models.PositiveSmallIntegerField(_('year'), choices=year_choices())
     site = models.URLField(verbose_name=_('site'), blank=True)
-    logo = models.ImageField(upload_to='company/logos/', verbose_name=_('logo'))
-    banner = models.ImageField(upload_to='company/banners/', verbose_name=_('banner'))
+    logo = models.ImageField(upload_to='company/logos/', verbose_name=_('logo'), null=True, blank=True)
+    banner = models.ImageField(upload_to='company/banners/', verbose_name=_('banner'), null=True, blank=True)
     type = models.ForeignKey(CompanyType, on_delete=models.PROTECT, related_name='companies', verbose_name='type')
     number_of_employees = models.PositiveSmallIntegerField(verbose_name=_('number of employees'))
     description = models.TextField(verbose_name=_('description'))
@@ -37,6 +38,8 @@ class Company(BaseModel):
     introduction = models.TextField(verbose_name=_('introduction'), blank=True)
     culture = models.TextField(verbose_name=_('culture'), blank=True)
     advantage = models.TextField(verbose_name=_('advantage'), blank=True)
+    employer = models.OneToOneField(to=Employer, verbose_name=_('employer'), related_name='company',
+                                    on_delete=models.CASCADE)
 
     @property
     def name(self):

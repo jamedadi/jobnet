@@ -1,13 +1,16 @@
 from django.db import models
 
+from accounts.models import JobSeeker, Employer
 from address.models import City
 from company.models import Company
 from lib.models import BaseModel
 from django.utils.translation import ugettext_lazy as _
 
+from resume.models import Resume
+
 
 class JobCategory(BaseModel):
-    name = models.CharField(max_length=48, verbose_name=_('name'))
+    name = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -19,7 +22,7 @@ class JobCategory(BaseModel):
 
 
 class Skill(BaseModel):
-    title = models.CharField(max_length=48, verbose_name=_('name'))
+    title = models.CharField(max_length=48, verbose_name=_('name'), unique=True)
 
     def __str__(self):
         return f'{self.title}'
@@ -70,8 +73,9 @@ class Job(BaseModel):
         (NOT_IMPORTANT, _('not important')),
         (SERVED_OR_EXEMPT, _('served or exempt'))
     )
-
+    employer = models.ForeignKey(to=Employer, verbose_name=_('employer'), related_name='jobs', on_delete=models.CASCADE)
     company = models.ForeignKey(to=Company, verbose_name=_('company'), related_name='jobs', on_delete=models.CASCADE)
+
     title = models.CharField(max_length=48, verbose_name=_('name'))
     category = models.ForeignKey(to=JobCategory, verbose_name=_('category'), related_name='jobs',
                                  on_delete=models.SET_NULL, null=True)
@@ -81,7 +85,7 @@ class Job(BaseModel):
     work_experience = models.PositiveSmallIntegerField(verbose_name=_('work experience'),
                                                        choices=WORK_EXPERIENCE_CHOICES, default=0)
     salary_agreement = models.BooleanField(verbose_name=_('salary agreement'), default=True)
-    salary = models.PositiveIntegerField(verbose_name=_('salary'))
+    salary = models.PositiveIntegerField(verbose_name=_('salary'), null=True)
     description = models.TextField(verbose_name=_('description'))
     sex = models.PositiveSmallIntegerField(verbose_name=_('sex'), choices=SEX_CHOICES)
     at_least_degree = models.PositiveSmallIntegerField(verbose_name=_('at least degree'), choices=DEGREE_CHOICES)
@@ -96,3 +100,36 @@ class Job(BaseModel):
         verbose_name = _('job')
         verbose_name_plural = _('jobs')
         db_table = 'jobs'
+
+
+class JobRequest(BaseModel):
+    NOT_SEEN = 0
+    SEEN = 1
+    SEEN_STATUS_CHOICES = (
+        (SEEN, _('seen')),
+        (NOT_SEEN, _('not seen'))
+    )
+
+    WAITING = 0
+    DENIED = 1
+    STATUS_CHOICES = (
+        (WAITING, _('waiting')),
+        (DENIED, _('denied'))
+    )
+
+    job = models.ForeignKey(to=Job, verbose_name=_('job'), related_name='job_requests', on_delete=models.PROTECT)
+    job_seeker = models.ForeignKey(to=JobSeeker, verbose_name=_('job seeker'), related_name='job_requests',
+                                   on_delete=models.PROTECT)
+    resume = models.ForeignKey(to=Resume, verbose_name=_('resume'), related_name='job_requests',
+                               on_delete=models.SET_NULL, null=True)
+    seen_status = models.PositiveSmallIntegerField(verbose_name=_('seen status'), choices=SEEN_STATUS_CHOICES,
+                                                   default=NOT_SEEN)
+    status = models.PositiveSmallIntegerField(verbose_name=_('status'), choices=STATUS_CHOICES, default=WAITING)
+
+    def __str__(self):
+        return f"{self.job_seeker} - {self.job}"
+
+    class Meta:
+        verbose_name = _('job request')
+        verbose_name_plural = _('job requests')
+        db_table = 'job_request'
