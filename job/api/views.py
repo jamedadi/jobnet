@@ -1,5 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 
+from job.api.filters import JobFilter
 from job.api.permissions import IsEmployerOrReadOnly, IsCompanyEmployerOrReadOnly
 from job.api.serializers import JobCategorySerializer, SkillSerializer, ReadJobSerializer, WriteJobSerializer
 from job.models import JobCategory, Skill, Job
@@ -21,7 +22,7 @@ class SkillViewSet(ModelViewSet):
 class JobViewSet(ModelViewSet):
     queryset = Job.objects.all()
     permission_classes = [IsCompanyEmployerOrReadOnly]
-    filterset_fields = ['category__name', 'city__name', 'city__state__name', 'cooperation_type', 'remote_available']
+    filterset_class = JobFilter
     search_fields = ['title', 'required_skills__title']
 
     def get_serializer_class(self):
