@@ -21,6 +21,8 @@ class SkillViewSet(ModelViewSet):
 class JobViewSet(ModelViewSet):
     queryset = Job.objects.all()
     permission_classes = [IsCompanyEmployerOrReadOnly]
+    search_fields = ['title']
+    filterset_fields = ['category__name']
 
     def get_serializer_class(self):
         if self.action in ('create', 'update', 'partial_update'):
