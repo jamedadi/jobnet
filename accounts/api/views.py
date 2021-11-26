@@ -4,10 +4,11 @@ from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIVie
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
-    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer
+    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
 
@@ -55,3 +56,7 @@ class UserInfo(RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
