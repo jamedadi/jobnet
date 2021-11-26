@@ -12,9 +12,10 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
     JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, ResendEmailSerializers
-from accounts.api.utils import send_verification_email
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
+
+from accounts.tasks import send_verification_email, send_verification_email_task
 
 User = get_user_model()
 
@@ -28,10 +29,10 @@ class UserRegistrationCreateApiView(CreateAPIView):
         user_type = self.kwargs.get(self.lookup_url_kwarg, None)
         if user_type == 'employer':
             user = serializer.save(is_employer=True)
-            send_verification_email(user)
+            send_verification_email_task.delay(user.pk)
         elif user_type == 'job-seeker':
             user = serializer.save(is_job_seeker=True)
-            send_verification_email(user)
+            send_verification_email_task.delay(user.pk)
         else:
             raise NotAcceptable
 
@@ -99,6 +100,6 @@ class ResendEmail(APIView):
         except User.DoesNotExist:
             return Response('User with this email has not been found', status=status.HTTP_404_NOT_FOUND)
         if not user.email_verified:
-            send_verification_email(user)
+            send_verification_email_task.delay(user.pk)
             return Response('Verification email has been sent', status=status.HTTP_200_OK)
         return Response('Email is already activated', status=status.HTTP_400_BAD_REQUEST)

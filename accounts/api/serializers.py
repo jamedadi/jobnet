@@ -9,8 +9,8 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework import exceptions, serializers
 
 from accounts.api.exceptions import EmailNotVerified
-from accounts.api.utils import send_verification_email
 from accounts.models import JobSeeker, Employer
+from accounts.tasks import send_verification_email, send_verification_email_task
 
 User = get_user_model()
 
@@ -159,7 +159,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'no_active_account',
             )
         if not self.user.email_verified:
-            send_verification_email(self.user)
+            send_verification_email_task.delay(self.user.pk)
             raise EmailNotVerified
 
         refresh = self.get_token(self.user)
