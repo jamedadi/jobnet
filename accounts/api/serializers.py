@@ -1,14 +1,14 @@
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 
-from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework import exceptions, serializers
 
-from accounts.exceptions import EmailNotVerified
+from accounts.api.exceptions import EmailNotVerified
 from accounts.models import JobSeeker, Employer
 
 User = get_user_model()
@@ -159,4 +159,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             )
         if not self.user.email_verified:
             raise EmailNotVerified
-        return {}
+
+        refresh = self.get_token(self.user)
+        data = dict()
+        data['refresh'] = str(refresh)
+        data['access'] = str(refresh.access_token)
+
+        if api_settings.UPDATE_LAST_LOGIN:
+            update_last_login(None, self.user)
+
+        return data

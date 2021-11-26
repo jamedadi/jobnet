@@ -8,7 +8,7 @@ def create_activation_link(user):
 
 
 def send_verification_email(user):
-    user.send_email(
+    user.email_user(
         subject='Jobnet : verify your email',
         message=create_activation_link(user)
     )
