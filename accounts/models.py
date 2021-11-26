@@ -22,6 +22,7 @@ class CustomUser(AbstractUser):
         },
     )
     email = models.EmailField(_('email address'), unique=True)
+    email_verified = models.BooleanField(_('email verified'), default=False)
     phone_number = models.CharField(max_length=9, verbose_name=_('phone number'), blank=True)
     is_employer = models.BooleanField(default=False, verbose_name=_('is employer'))
     is_job_seeker = models.BooleanField(default=False, verbose_name=_('is job seeker'))
