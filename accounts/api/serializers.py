@@ -107,12 +107,10 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    date_joined = serializers.DateTimeField(read_only=True)
-
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'date_joined')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'date_joined')
+        read_only_fields = ('id', 'email', 'date_joined')
 
 
 class JobSeekerSerializer(BaseUserUpdateSerializer):
