@@ -1,15 +1,13 @@
 from django.contrib.auth import get_user_model
 
-from rest_framework.generics import CreateAPIView, UpdateAPIView
-from rest_framework import status
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import mixins
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
-    JobSeekerSerializer, EmployerSerializer
+    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
 
@@ -49,3 +47,11 @@ class EmployerAPIView(mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.Ret
     queryset = Employer.objects.all()
     serializer_class = EmployerSerializer
     permission_classes = (IsEmployer,)
+
+
+class UserInfo(RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserInfoSerializer
+
+    def get_object(self):
+        return self.request.user

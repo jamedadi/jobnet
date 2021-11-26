@@ -129,3 +129,9 @@ class EmployerSerializer(BaseUserUpdateSerializer):
     class Meta:
         model = Employer
         fields = ('user',)
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'is_employer', 'is_job_seeker')
