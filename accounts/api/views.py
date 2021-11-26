@@ -11,6 +11,7 @@ from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
     JobSeekerSerializer, EmployerSerializer
 from accounts.models import JobSeeker, Employer
+from rest_framework.exceptions import NotAcceptable
 
 User = get_user_model()
 
@@ -26,8 +27,7 @@ class UserRegistrationCreateApiView(CreateAPIView):
             serializer.save(is_employer=True)
         elif user_type == 'job_seeker':
             serializer.save(is_job_seeker=True)
-        else:
-            return Response('Don\'t send bad params!', status=status.HTTP_400_BAD_REQUEST)
+        raise NotAcceptable
 
 
 class UserChangePasswordUpdateApiView(UpdateAPIView):
