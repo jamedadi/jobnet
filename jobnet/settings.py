@@ -112,3 +112,5 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',
                                 'rest_framework.filters.SearchFilter'],
 }
+
+ACTIVATION_LINK_URL = '127.0.0.1:8000/api/accounts/verify-email/'
