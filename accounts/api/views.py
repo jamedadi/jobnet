@@ -1,15 +1,16 @@
 from django.contrib.auth import get_user_model
-from django.utils.translation import ugettext_lazy as _
 
 from rest_framework.generics import CreateAPIView, UpdateAPIView
-from rest_framework import exceptions
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import mixins
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from accounts.api.permissions import IsNotAuthenticated, UserObjectOwner
+from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
-    UserDetailUpdateAndReadSerializer
+    JobSeekerSerializer, EmployerSerializer
+from accounts.models import JobSeeker, Employer
 
 User = get_user_model()
 
@@ -21,12 +22,12 @@ class UserRegistrationCreateApiView(CreateAPIView):
 
     def perform_create(self, serializer):
         user_type = self.kwargs.get(self.lookup_url_kwarg, None)
-        if user_type == 'is_employer':
+        if user_type == 'employer':
             serializer.save(is_employer=True)
-        elif user_type == 'is_job_seeker':
+        elif user_type == 'job_seeker':
             serializer.save(is_job_seeker=True)
         else:
-            raise exceptions.NotAcceptable(_('Don\'t send bad params!'))
+            return Response('Don\'t send bad params!', status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserChangePasswordUpdateApiView(UpdateAPIView):
@@ -38,15 +39,13 @@ class UserChangePasswordUpdateApiView(UpdateAPIView):
         return self.request.user
 
 
-class UserUpdateDetailUpdateApiView(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                                    mixins.UpdateModelMixin, GenericViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserDetailUpdateAndReadSerializer
-    permission_classes = (IsAuthenticated,)
+class JobSeekerAPIView(mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = JobSeeker.objects.all()
+    serializer_class = JobSeekerSerializer
+    permission_classes = (IsJobSeeker,)
 
-    def get_permissions(self):
-        if self.action in ('update', 'partial_update'):
-            permission_classes = (UserObjectOwner,)
-        else:
-            permission_classes = ()
-        return (permission() for permission in permission_classes)
+
+class EmployerAPIView(mixins.ListModelMixin, mixins.UpdateModelMixin, mixins.RetrieveModelMixin, GenericViewSet):
+    queryset = Employer.objects.all()
+    serializer_class = EmployerSerializer
+    permission_classes = (IsEmployer,)
