@@ -10,6 +10,21 @@ from accounts.models import JobSeeker, Employer
 User = get_user_model()
 
 
+class BaseUserUpdateSerializer(serializers.ModelSerializer):
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            for attr, value in user_data.items():
+                setattr(instance.user, attr, value)
+            instance.user.save()
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
+
+
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
@@ -87,12 +102,30 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
         if instance.check_password(validated_data.get('old_password')):
             instance.password = make_password(validated_data.get('new_password'))
             instance.save()
+            return instance
         raise serializers.ValidationError(_('Old Password and Password isn\'t equal!'))
 
 
-class UserDetailUpdateAndReadSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'date_joined')
+        fields = ('id', 'username', 'first_name', 'last_name', 'date_joined')
+
+
+class JobSeekerSerializer(BaseUserUpdateSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = JobSeeker
+        fields = ('user', 'birthday')
+
+
+class EmployerSerializer(BaseUserUpdateSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Employer
+        fields = ('user',)
