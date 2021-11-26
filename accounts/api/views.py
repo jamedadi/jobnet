@@ -11,7 +11,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
-    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer
+    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, ResendEmailSerializers
 from accounts.api.utils import send_verification_email
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
@@ -82,23 +82,23 @@ class VerifyEmail(APIView):
         if not default_token_generator.check_token(user, confirmation_token):
             return Response('Token is invalid or expired. Please request another confirmation email by signing in.',
                             status=status.HTTP_400_BAD_REQUEST)
-        user.is_active = True
         user.email_verified = True
         user.save()
         return Response('Email successfully confirmed')
 
-# class ResendEmail(APIView):
-#     serializer_class = ResendEmailSerializers
-#
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         email = serializer.validated_data.get('email')
-#         try:
-#             user = CustomUser.objects.get(email=email)
-#         except CustomUser.DoesNotExist:
-#             return Response('User with this email has not been found', status=status.HTTP_404_NOT_FOUND)
-#         if not user.is_active:
-#             send_email(create_activation_email_data(user))
-#             return Response('Verification email has been sent', status=status.HTTP_200_OK)
-#         return Response('Your email is already activated', status=status.HTTP_400_BAD_REQUEST)
+
+class ResendEmail(APIView):
+    serializer_class = ResendEmailSerializers
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response('User with this email has not been found', status=status.HTTP_404_NOT_FOUND)
+        if not user.email_verified:
+            send_verification_email(user)
+            return Response('Verification email has been sent', status=status.HTTP_200_OK)
+        return Response('Email is already activated', status=status.HTTP_400_BAD_REQUEST)
