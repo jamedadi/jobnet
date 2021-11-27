@@ -23,6 +23,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         exclude = ('employer', 'modified_time')
+        read_only_fields = ('id',)
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
