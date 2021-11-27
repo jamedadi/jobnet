@@ -13,7 +13,7 @@ def year_choices():
 
 
 class CompanyType(BaseModel):
-    type = models.CharField(max_length=60, verbose_name=_('type'))
+    type = models.CharField(max_length=60, verbose_name=_('type'), unique=True)
 
     class Meta:
         verbose_name = _('company type')
@@ -55,7 +55,7 @@ class Company(BaseModel):
 
 
 class EmployeeType(BaseModel):
-    type = models.CharField(max_length=60, verbose_name=_('type'))
+    type = models.CharField(max_length=60, verbose_name=_('type'), unique=True)
 
     def __str__(self):
         return self.type
