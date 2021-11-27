@@ -7,7 +7,7 @@ from company.models import Company
 from lib.api.permissions import IsObjectEmployerOrReadOnly
 
 
-class CompanyModelViewSetApi(ModelViewSet):
+class CompanyModelViewSetAPI(ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     permission_classes = (IsObjectEmployerOrReadOnly,)
