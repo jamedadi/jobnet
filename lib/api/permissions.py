@@ -25,3 +25,19 @@ class IsObjectEmployerOrReadOnly(BasePermission):
             return True
         user = request.user
         return bool(user.is_authenticated and user.is_employer and obj.employer == user.employer)
+
+
+class IsEmployer(IsObjectEmployerOrReadOnly):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        user = request.user
+        return bool(user.is_authenticated and user.is_employer)
+
+
+class IsEmployerOwnedEmployeeOrReadOnly(IsObjectEmployerOrReadOnly):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        user = request.user
+        return bool(user.is_authenticated and user.is_employer and obj.company.employer == user.employer)

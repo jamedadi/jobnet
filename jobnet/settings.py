@@ -104,6 +104,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+
+SITE_NAME = "Jobnet"
+
 # django-rest-framework
 
 REST_FRAMEWORK = {
@@ -112,3 +121,10 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend',
                                 'rest_framework.filters.SearchFilter'],
 }
+
+ACTIVATION_LINK_URL = '127.0.0.1:8000/api/accounts/verify-email/'
+
+# celery
+
+CELERY_TIMEZONE = 'Asia/Tehran'
+CELERY_TASK_TIME_LIMIT = 5 * 60

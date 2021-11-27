@@ -1,11 +1,16 @@
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 
-from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework import exceptions, serializers
 
+from accounts.api.exceptions import EmailNotVerified
 from accounts.models import JobSeeker, Employer
+from accounts.tasks import send_verification_email, send_verification_email_task
 
 User = get_user_model()
 
@@ -107,12 +112,10 @@ class UserChangePasswordSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    date_joined = serializers.DateTimeField(read_only=True)
-
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'date_joined')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'date_joined')
+        read_only_fields = ('id', 'email', 'date_joined')
 
 
 class JobSeekerSerializer(BaseUserUpdateSerializer):
@@ -129,3 +132,44 @@ class EmployerSerializer(BaseUserUpdateSerializer):
     class Meta:
         model = Employer
         fields = ('user',)
+
+
+class UserInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'is_employer', 'is_job_seeker')
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        authenticate_kwargs = {
+            self.username_field: attrs[self.username_field],
+            'password': attrs['password'],
+        }
+        try:
+            authenticate_kwargs['request'] = self.context['request']
+        except KeyError:
+            pass
+
+        self.user = authenticate(**authenticate_kwargs)
+
+        if not api_settings.USER_AUTHENTICATION_RULE(self.user):
+            raise exceptions.AuthenticationFailed(
+                self.error_messages['no_active_account'],
+                'no_active_account',
+            )
+        if not self.user.email_verified:
+            send_verification_email_task.delay(self.user.pk)
+            raise EmailNotVerified
+
+        refresh = self.get_token(self.user)
+        data = dict(refresh=str(refresh), access=str(refresh.access_token), user_id=self.user.id,
+                    username=self.user.username, email=self.user.email)
+        if api_settings.UPDATE_LAST_LOGIN:
+            update_last_login(None, self.user)
+
+        return data
+
+
+class ResendEmailSerializers(serializers.Serializer):
+    email = serializers.EmailField(required=True)
