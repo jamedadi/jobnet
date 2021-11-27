@@ -15,7 +15,7 @@ from accounts.api.serializers import UserRegistrationSerializer, UserChangePassw
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
 
-from accounts.tasks import send_verification_email, send_verification_email_task
+from accounts.tasks import send_verification_email_task
 
 User = get_user_model()
 
