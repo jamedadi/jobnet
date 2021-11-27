@@ -9,9 +9,9 @@ app_name = 'company'
 router = routers.SimpleRouter()
 
 router.register('employee', EmployeeModelViewSetAPI)
+router.register('company-type', CompanyTypeModelViewSetAPI)
+router.register('employee-type', EmployeeTypeModelViewSetAPI)
 router.register('', CompanyModelViewSetAPI)
-router.register('type/company', CompanyTypeModelViewSetAPI)
-router.register('type/employee', EmployeeTypeModelViewSetAPI)
 
 urlpatterns = [
     path('', include(router.urls)),
