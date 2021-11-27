@@ -40,5 +40,8 @@ class EmployeeModelViewSetAPI(ModelViewSet):
     serializer_class = EmployeeSerializer
     permission_classes = (IsEmployerOwnedEmployeeOrReadOnly,)
 
+    def get_queryset(self):
+        return Employee.objects.filter(company=self.request.user.employer.company)
+
     def perform_create(self, serializer):
         serializer.save(company=self.request.user.employer.company)
