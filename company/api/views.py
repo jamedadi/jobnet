@@ -2,8 +2,8 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
 
 from company.api.filters import CompanyFilter
-from company.api.serializers import CompanySerializer, CompanyTypeSerializer
-from company.models import Company, CompanyType
+from company.api.serializers import CompanySerializer, CompanyTypeSerializer, EmployeeTypeSerializer
+from company.models import Company, CompanyType, EmployeeType
 
 from lib.api.permissions import IsObjectEmployerOrReadOnly, IsEmployer
 
@@ -24,4 +24,12 @@ class CompanyTypeModelViewSetAPI(mixins.CreateModelMixin, mixins.RetrieveModelMi
     queryset = CompanyType.objects.all()
     serializer_class = CompanyTypeSerializer
     permission_classes = (IsEmployer,)
-    search_fields = ('type', )
+    search_fields = ('type',)
+
+
+class EmployeeTypeModelViewSetAPI(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
+                                  mixins.ListModelMixin, GenericViewSet):
+    queryset = EmployeeType.objects.all()
+    serializer_class = EmployeeTypeSerializer
+    permission_classes = (IsEmployer,)
+    search_fields = ('type',)
