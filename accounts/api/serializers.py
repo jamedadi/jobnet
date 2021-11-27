@@ -163,10 +163,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             raise EmailNotVerified
 
         refresh = self.get_token(self.user)
-        data = dict()
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
-
+        data = dict(refresh=str(refresh), access=str(refresh.access_token), user_id=self.user.id,
+                    username=self.user.username, email=self.user.email)
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
 
