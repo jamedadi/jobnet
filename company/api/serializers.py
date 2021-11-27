@@ -17,17 +17,18 @@ class EmployeeTypeSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    created_time = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        model = Company
-        exclude = ('employer', 'modified_time')
-        read_only_fields = ('id',)
-
-
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         exclude = ('company', 'modified_time')
+        read_only_fields = ('id',)
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    created_time = serializers.DateTimeField(read_only=True)
+    employees = EmployeeSerializer(many=True)
+
+    class Meta:
+        model = Company
+        exclude = ('employer', 'modified_time')
         read_only_fields = ('id',)
