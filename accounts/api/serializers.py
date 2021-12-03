@@ -171,5 +171,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class ResendEmailSerializers(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
