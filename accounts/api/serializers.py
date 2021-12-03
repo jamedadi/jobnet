@@ -173,3 +173,27 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        fields = ('new_password', 'confirm_password')
+
+    def validate(self, attrs):
+        # here check password is strong or what! :D
+        validate_password(attrs.get('new_password'))
+
+        if attrs.get('new_password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError(_('Password and Confirm Password isn\'t equal!'))
+        return attrs
