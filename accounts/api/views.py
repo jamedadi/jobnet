@@ -1,9 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
-
-from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
-from rest_framework.permissions import IsAuthenticated
+from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode
 from rest_framework import mixins, status
+from rest_framework.exceptions import NotAcceptable
+from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
@@ -11,7 +14,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
-    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, ResendEmailSerializers
+    JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, EmailSerializer, \
+    ResetPasswordSerializer
 from accounts.models import JobSeeker, Employer
 from rest_framework.exceptions import NotAcceptable
 
@@ -103,3 +107,46 @@ class ResendEmail(APIView):
             send_verification_email_task.delay(user.pk)
             return Response('Verification email has been sent', status=status.HTTP_200_OK)
         return Response('Email is already activated', status=status.HTTP_400_BAD_REQUEST)
+
+
+class RequestResetEmailPasswordAPIView(GenericAPIView):
+    permission_classes = [IsNotAuthenticated]
+    serializer_class = EmailSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data.get('email')
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response('User with this email has not been found', status=status.HTTP_404_NOT_FOUND)
+        else:
+            send_email_task.delay(user.pk, 'reset_password')
+            return Response('Verification email has been sent', status=status.HTTP_200_OK)
+
+
+class ResetEmailPasswordAPIView(GenericAPIView):
+    permission_classes = [IsNotAuthenticated]
+    serializer_class = ResetPasswordSerializer
+
+    def patch(self, request, uib64, token, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            user_id = smart_str(urlsafe_base64_decode(uib64))
+        except DjangoUnicodeDecodeError:
+            return Response('can\'t decode url', status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response('User not found', status=status.HTTP_404_NOT_FOUND)
+        else:
+            if not default_token_generator.check_token(user, token):
+                return Response('Token is invalid or expired.', status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(serializer.validated_data.get('new_password'))
+            user.save()
+
+            return Response('password changed successfully', status=status.HTTP_200_OK)
