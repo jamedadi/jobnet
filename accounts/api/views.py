@@ -77,23 +77,25 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 class VerifyEmail(APIView):
     permission_classes = [IsNotAuthenticated]
 
-    def get(self, request, *args, **kwargs):
-        user_id = request.query_params.get('user_id', None)
-        confirmation_token = request.query_params.get('confirmation_token', None)
+    def get(self, request, uib64, token, *args, **kwargs):
+        try:
+            user_id = smart_str(urlsafe_base64_decode(uib64))
+        except DjangoUnicodeDecodeError:
+            return Response('can\'t decode url', status=status.HTTP_400_BAD_REQUEST)
         try:
             user = User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return Response('User not found', status=status.HTTP_404_NOT_FOUND)
-        if not default_token_generator.check_token(user, confirmation_token):
-            return Response('Token is invalid or expired. Please request another confirmation email by signing in.',
-                            status=status.HTTP_400_BAD_REQUEST)
-        user.email_verified = True
-        user.save()
-        return Response('Email successfully confirmed')
+        else:
+            if not default_token_generator.check_token(user, token):
+                return Response('Token is invalid or expired.', status=status.HTTP_400_BAD_REQUEST)
+            user.email_verified = True
+            user.save()
+            return Response('Email successfully confirmed')
 
 
-class ResendEmail(APIView):
-    serializer_class = ResendEmailSerializers
+class ResendEmail(GenericAPIView):
+    serializer_class = EmailSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
@@ -103,10 +105,11 @@ class ResendEmail(APIView):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response('User with this email has not been found', status=status.HTTP_404_NOT_FOUND)
-        if not user.email_verified:
-            send_verification_email_task.delay(user.pk)
-            return Response('Verification email has been sent', status=status.HTTP_200_OK)
-        return Response('Email is already activated', status=status.HTTP_400_BAD_REQUEST)
+        else:
+            if not user.email_verified:
+                send_email_task.delay(user.pk, 'email_verification')
+                return Response('Verification email has been sent', status=status.HTTP_200_OK)
+            return Response('Email is already activated', status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestResetEmailPasswordAPIView(GenericAPIView):
