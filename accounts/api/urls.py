@@ -17,7 +17,6 @@ urlpatterns = [
     path('registration/<str:user_type>/', UserRegistrationCreateApiView.as_view(), name='registration'),
     path('user/', UserInfo.as_view()),
     path('change-password/', UserChangePasswordUpdateApiView.as_view(), name='change-password'),
-    path('verify-email/', VerifyEmail.as_view(), name='verify-email'),
     path('resend-email/', ResendEmail.as_view(), name='resend-email'),
     path('verify-email/<uib64>/<token>/', VerifyEmail.as_view(), name='verify-email'),
     path('request-reset-password/', RequestResetEmailPasswordAPIView.as_view(), name='request-reset-password'),
