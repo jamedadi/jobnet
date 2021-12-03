@@ -17,9 +17,7 @@ from accounts.api.serializers import UserRegistrationSerializer, UserChangePassw
     JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, EmailSerializer, \
     ResetPasswordSerializer
 from accounts.models import JobSeeker, Employer
-from rest_framework.exceptions import NotAcceptable
-
-from accounts.tasks import send_verification_email_task
+from accounts.tasks import send_email_task
 
 User = get_user_model()
 
@@ -33,10 +31,10 @@ class UserRegistrationCreateApiView(CreateAPIView):
         user_type = self.kwargs.get(self.lookup_url_kwarg, None)
         if user_type == 'employer':
             user = serializer.save(is_employer=True)
-            send_verification_email_task.delay(user.pk)
+            send_email_task.delay(user.pk, 'email_verification')
         elif user_type == 'job-seeker':
             user = serializer.save(is_job_seeker=True)
-            send_verification_email_task.delay(user.pk)
+            send_email_task.delay(user.pk, 'email_verification')
         else:
             raise NotAcceptable
 
