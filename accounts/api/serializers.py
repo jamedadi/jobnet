@@ -1,16 +1,15 @@
+from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
-
+from rest_framework import exceptions, serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework import exceptions, serializers
 
 from accounts.api.exceptions import EmailNotVerified
 from accounts.models import JobSeeker, Employer
-from accounts.tasks import send_verification_email, send_verification_email_task
+from accounts.tasks import send_email_task
 
 User = get_user_model()
 
@@ -159,7 +158,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
                 'no_active_account',
             )
         if not self.user.email_verified:
-            send_verification_email_task.delay(self.user.pk)
+            send_email_task.delay(self.user.pk)
             raise EmailNotVerified
 
         refresh = self.get_token(self.user)
@@ -171,5 +170,29 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return data
 
 
-class ResendEmailSerializers(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        fields = ('new_password', 'confirm_password')
+
+    def validate(self, attrs):
+        # here check password is strong or what! :D
+        validate_password(attrs.get('new_password'))
+
+        if attrs.get('new_password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError(_('Password and Confirm Password isn\'t equal!'))
+        return attrs
