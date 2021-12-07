@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import ugettext_lazy as _
@@ -137,32 +137,13 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            'password': attrs['password'],
-        }
-        try:
-            authenticate_kwargs['request'] = self.context['request']
-        except KeyError:
-            pass
+        data = super().validate(attrs)
 
-        self.user = authenticate(**authenticate_kwargs)
-
-        if not api_settings.USER_AUTHENTICATION_RULE(self.user):
-            raise exceptions.AuthenticationFailed(
-                self.error_messages['no_active_account'],
-                'no_active_account',
-            )
         if not self.user.email_verified:
-            send_email_task.delay(self.user.pk)
+            send_email_task.delay(self.user.pk, 'email_verification')
             raise EmailNotVerified
 
-        refresh = self.get_token(self.user)
-        data = dict(refresh=str(refresh), access=str(refresh.access_token), user_id=self.user.id,
-                    username=self.user.username, email=self.user.email)
-        if api_settings.UPDATE_LAST_LOGIN:
-            update_last_login(None, self.user)
-
+        data.update({'user_id': self.user.id, 'username': self.user.username, 'email': self.user.email})
         return data
 
 
