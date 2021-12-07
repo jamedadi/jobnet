@@ -1,16 +1,14 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework import exceptions, serializers
 
 from accounts.api.exceptions import EmailNotVerified
 from accounts.models import JobSeeker, Employer
-from accounts.tasks import send_verification_email, send_verification_email_task
+from accounts.tasks import send_email_task
 
 User = get_user_model()
 
@@ -18,15 +16,12 @@ User = get_user_model()
 class BaseUserUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
+        instance = super().update(instance, validated_data)
+
         if user_data:
             for attr, value in user_data.items():
                 setattr(instance.user, attr, value)
             instance.user.save()
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
         return instance
 
 
@@ -142,34 +137,39 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
-        authenticate_kwargs = {
-            self.username_field: attrs[self.username_field],
-            'password': attrs['password'],
-        }
-        try:
-            authenticate_kwargs['request'] = self.context['request']
-        except KeyError:
-            pass
+        data = super().validate(attrs)
 
-        self.user = authenticate(**authenticate_kwargs)
-
-        if not api_settings.USER_AUTHENTICATION_RULE(self.user):
-            raise exceptions.AuthenticationFailed(
-                self.error_messages['no_active_account'],
-                'no_active_account',
-            )
         if not self.user.email_verified:
-            send_verification_email_task.delay(self.user.pk)
+            send_email_task.delay(self.user.pk, 'email_verification')
             raise EmailNotVerified
 
-        refresh = self.get_token(self.user)
-        data = dict(refresh=str(refresh), access=str(refresh.access_token), user_id=self.user.id,
-                    username=self.user.username, email=self.user.email)
-        if api_settings.UPDATE_LAST_LOGIN:
-            update_last_login(None, self.user)
-
+        data.update({'user_id': self.user.id, 'username': self.user.username, 'email': self.user.email})
         return data
 
 
-class ResendEmailSerializers(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+    confirm_password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'}
+    )
+
+    class Meta:
+        fields = ('new_password', 'confirm_password')
+
+    def validate(self, attrs):
+        # here check password is strong or what! :D
+        validate_password(attrs.get('new_password'))
+
+        if attrs.get('new_password') != attrs.get('confirm_password'):
+            raise serializers.ValidationError(_('Password and Confirm Password isn\'t equal!'))
+        return attrs
