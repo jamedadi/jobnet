@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import exceptions, serializers
+
+from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.settings import api_settings
 
 from accounts.api.exceptions import EmailNotVerified
 from accounts.models import JobSeeker, Employer
@@ -17,15 +16,12 @@ User = get_user_model()
 class BaseUserUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
+        instance = super().update(instance, validated_data)
+
         if user_data:
             for attr, value in user_data.items():
                 setattr(instance.user, attr, value)
             instance.user.save()
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-
         return instance
 
 
