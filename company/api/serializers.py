@@ -26,7 +26,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 class CompanySerializer(serializers.ModelSerializer):
     created_time = serializers.DateTimeField(read_only=True)
-    employees = EmployeeSerializer(many=True)
+    employees = EmployeeSerializer(many=True, read_only=True)
 
     class Meta:
         model = Company

@@ -2,15 +2,17 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
-from rest_framework import mixins, status
+
+from rest_framework import mixins
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, UpdateAPIView, RetrieveAPIView
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework import status
+from rest_framework.response import Response
 
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
