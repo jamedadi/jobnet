@@ -1,3 +1,5 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
 
@@ -13,7 +15,9 @@ class CompanyModelViewSetAPI(ModelViewSet):
     serializer_class = CompanySerializer
     permission_classes = (IsObjectEmployerOrReadOnly,)
     filterset_class = CompanyFilter
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     search_fields = ('persian_name', 'english_name')
+    ordering_fields = ('created_time',)
 
     def perform_create(self, serializer):
         serializer.save(employer=self.request.user.employer)
