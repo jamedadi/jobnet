@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from accounts.api.permissions import IsNotAuthenticated, IsJobSeeker, IsEmployer
 from accounts.api.serializers import UserRegistrationSerializer, UserChangePasswordSerializer, \
     JobSeekerSerializer, EmployerSerializer, UserInfoSerializer, CustomTokenObtainPairSerializer, EmailSerializer, \
-    ResetPasswordSerializer
+    ResetPasswordSerializer, EmailChangeSerializer
 from accounts.models import JobSeeker, Employer
 from accounts.tasks import send_email_task
 
@@ -153,3 +153,37 @@ class ResetEmailPasswordAPIView(GenericAPIView):
             user.save()
 
             return Response('password changed successfully', status=status.HTTP_200_OK)
+
+
+class EmailChangeAPIView(APIView):
+    authentication_classes = (IsAuthenticated,)
+    serializer_class = EmailChangeSerializer
+
+    def patch(self, request, *args, **kwargs):
+        user = request.user
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_email = serializer.validated_data['email']
+        user.new_email = new_email
+        send_email_task.delay(user.pk, 'change-email')
+        return Response('verification link has been sent to your new email')
+
+
+class ChangeEmailVerifyAPIView(APIView):
+
+    def get(self, request, uib64, token, *args, **kwargs):
+        try:
+            user_id = smart_str(urlsafe_base64_decode(uib64))
+        except DjangoUnicodeDecodeError:
+            return Response('can\'t decode url', status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return Response('User not found', status=status.HTTP_404_NOT_FOUND)
+        else:
+            if not default_token_generator.check_token(user, token):
+                return Response('Token is invalid or expired.', status=status.HTTP_400_BAD_REQUEST)
+            user.email = user.new_email
+            user.new_email = ''
+            user.save()
+            return Response('email has been changed successfully')

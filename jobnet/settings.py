@@ -121,8 +121,6 @@ REST_FRAMEWORK = {
                                        'rest_framework.authentication.SessionAuthentication'],
 }
 
-ACTIVATION_LINK_URL = '127.0.0.1:8000/api/accounts/verify-email/'
-
 # celery
 
 CELERY_TIMEZONE = 'Asia/Tehran'

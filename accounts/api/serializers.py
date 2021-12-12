@@ -4,6 +4,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from accounts.api.exceptions import EmailNotVerified
@@ -149,6 +150,13 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+
+
+class EmailChangeSerializer(EmailSerializer):
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise ValidationError('this email is already used')
+        return value
 
 
 class ResetPasswordSerializer(serializers.Serializer):
