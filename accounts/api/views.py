@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.db import transaction
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode
 
@@ -155,8 +156,8 @@ class ResetEmailPasswordAPIView(GenericAPIView):
             return Response('password changed successfully', status=status.HTTP_200_OK)
 
 
-class EmailChangeAPIView(APIView):
-    authentication_classes = (IsAuthenticated,)
+class EmailChangeAPIView(GenericAPIView):
+    permission_classes = (IsAuthenticated,)
     serializer_class = EmailChangeSerializer
 
     def patch(self, request, *args, **kwargs):
@@ -183,7 +184,8 @@ class ChangeEmailVerifyAPIView(APIView):
         else:
             if not default_token_generator.check_token(user, token):
                 return Response('Token is invalid or expired.', status=status.HTTP_400_BAD_REQUEST)
-            user.email = user.new_email
-            user.new_email = ''
-            user.save()
-            return Response('email has been changed successfully')
+            with transaction.atomic():
+                user.email = user.new_email
+                user.new_email = ''
+                user.save()
+                return Response('email has been changed successfully')
