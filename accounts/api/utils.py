@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.http import urlsafe_base64_encode
@@ -46,5 +47,5 @@ def body_generator(user, email_type):
         }
 
 
-def send_email(user, email_type):
-    user.email_user(**body_generator(user, email_type))
+def send_email(user, email_type, new_email=False):
+    user.email_user(**body_generator(user, email_type), new_email=new_email)

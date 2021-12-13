@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.contrib.postgres.fields import CICharField
+from django.core.mail import send_mail
 
 from django.utils.translation import ugettext_lazy as _
 from django.db import models
@@ -27,6 +28,11 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=9, verbose_name=_('phone number'), blank=True)
     is_employer = models.BooleanField(default=False, verbose_name=_('is employer'))
     is_job_seeker = models.BooleanField(default=False, verbose_name=_('is job seeker'))
+
+    def email_user(self, subject, message, from_email=None, new_email=False, **kwargs):
+        if new_email:
+            send_mail(subject, message, from_email, [self.new_email], **kwargs)
+        super().email_user(subject, message, from_email, **kwargs)
 
     class Meta:
         verbose_name = _('user')

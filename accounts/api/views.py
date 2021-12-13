@@ -166,7 +166,8 @@ class EmailChangeAPIView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         new_email = serializer.validated_data['email']
         user.new_email = new_email
-        send_email_task.delay(user.pk, 'change-email')
+        user.save()
+        send_email_task.delay(user.pk, 'change-email', new_email)
         return Response('verification link has been sent to your new email')
 
 

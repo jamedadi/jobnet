@@ -7,6 +7,6 @@ User = get_user_model()
 
 
 @shared_task
-def send_email_task(user_id, email_type):
+def send_email_task(user_id, email_type, new_email=False):
     user = User.objects.get(id=user_id)
-    send_email(user, email_type)
+    send_email(user, email_type, new_email)
