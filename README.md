@@ -35,7 +35,7 @@ GRANT ALL PRIVILEGES ON DATABASE <database_name> TO <username>;
 
 ### Create a Password for your jobnet database user
 ```postgresql
-ALTER USER user_name WITH PASSWORD '<password>';
+ALTER USER <user_name> WITH PASSWORD '<password>';
 ```
 
 
