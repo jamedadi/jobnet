@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - jobnet_postgres:/var/lib/postgresql/data
+    restart: always
+    env_file:
+      - .envs/.postgres
+    ports:
+      - "5432:5432"
+
+  django:
+    build: .
+    env_file:
+      - .envs/.django
+      - .envs/.postgres
+    command: >
+      sh -c "
+        python manage.py makemigrations &&
+        python manage.py migrate &&
+        python manage.py collectstatic --no-input &&
+        python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - .:/jobnet
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  jobnet_postgres:

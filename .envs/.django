@@ -1,0 +1,7 @@
+SECRET_KEY='your-django-secret-key-from-djecrety.ir'
+DEBUG='true'
+ALLOWED_HOSTS='*'
+
+EMAIL_HOST_USER='<your_email_host_user>'
+EMAIL_HOST_PASSWORD='<your_email_host_password>'
+
